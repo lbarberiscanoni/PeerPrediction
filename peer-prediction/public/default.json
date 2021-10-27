@@ -1,0 +1,17 @@
+{
+  "items": {
+    "item_id": {
+      "name": "test A",
+      "description": "Lorem Ipsum patent",
+      "current_bids": {
+        "bid_id": {
+          "user": "user_A",
+          "stake": "50"
+        }
+      },
+      "history": {
+        "iteration_1": "median"
+      }
+    }
+  }
+}
