@@ -41,6 +41,8 @@ const Home = () => {
 
   const [user_id, changeUser] = useState("default")
 
+  const [hasVoted, updateVote] = useState(false)
+
   const vote = () => {
 
     //first, check the stake of the user to see that they are not over-betting
@@ -98,6 +100,7 @@ const Home = () => {
         .update(update)
     }
 
+    updateVote(true)
 
   }
 
@@ -118,38 +121,44 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
-    let current_item = Object.values(snapshots[0].val())[itemNum]
-    return (
-      <div>
-        <h1>Conspiracy Coin</h1>
-        <h3>Instructions</h3>
-        <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-        <p>Read up on the theory through the link above, and feel free to do your own research before answering</p>
-        <h2 dangerouslySetInnerHTML={{ __html: current_item.description }}></h2>
+    if (hasVoted) {
+      return(
+        <h1>Here's your code: { user_id }</h1>
+      )
+    } else {
+      let current_item = Object.values(snapshots[0].val())[itemNum]
+      return (
         <div>
-          <label>0 is not at all, 100 is absolutely certain</label>
-          <br />
-          <input 
-            type="range" 
-            className="form-range" 
-            min="0" 
-            max="1" 
-            defaultValue="0.5" 
-            step="0.01" 
-            onChange={(e) => { updateScore(e.target.value) }} 
-          />
-          <h3>{ score * 100}%</h3>
+          <h1>Conspiracy Coin</h1>
+          <h3>Instructions</h3>
+          <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
+          <p>Read up on the theory through the link above, and feel free to do your own research before answering</p>
+          <h2 dangerouslySetInnerHTML={{ __html: current_item.description }}></h2>
+          <div>
+            <label>0 is not at all, 100 is absolutely certain</label>
+            <br />
+            <input 
+              type="range" 
+              className="form-range" 
+              min="0" 
+              max="1" 
+              defaultValue="0.5" 
+              step="0.01" 
+              onChange={(e) => { updateScore(e.target.value) }} 
+            />
+            <h3>{ score * 100}%</h3>
 
-          <button
-            onClick={
-              () => vote()
-            }
-            >
-              Submit
-          </button>
+            <button
+              onClick={
+                () => vote()
+              }
+              >
+                Submit
+            </button>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
   } else {
     registerUser()
     return(
