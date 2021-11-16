@@ -156,10 +156,6 @@ const Home = () => {
               Submit
           </button>
         </div>
-        <div>
-          <h3>Your Bets ({ user_id })</h3>
-          <h5>available_capital: { snapshots[1].val()[user_id].capital }</h5>
-        </div>
       </div>
     )
   } else {
@@ -170,4 +166,8 @@ const Home = () => {
   }
 }
 
+        // <div>
+        //   <h3>Your Bets ({ user_id })</h3>
+        //   <h5>available_capital: { snapshots[1].val()[user_id].capital }</h5>
+        // </div>
 export default Home;

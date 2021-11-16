@@ -1,0 +1,115 @@
+{
+  "items" : {
+    "item_id" : {
+      "current_bids" : {
+        "-Mo-dK0JSS5Kr9R3spAa" : {
+          "score" : "0.75",
+          "stake" : "0.85",
+          "user" : "-Mo-dGkx_N1Xk9ZVx3rL"
+        },
+        "-Mo-dMynKA1DvX1zXiad" : {
+          "score" : "0.25",
+          "stake" : "0.8",
+          "user" : "-Mo-dLuWVfl5w_JxZ-_6"
+        },
+        "-Mo-dPmPz2Ar97pGxlHb" : {
+          "score" : "0.2",
+          "stake" : "0.3",
+          "user" : "-Mo-dOCaXxfrV95QeorA"
+        },
+        "-Mo-dSTfTHKFUgJV8hua" : {
+          "score" : "0.55",
+          "stake" : "0.25",
+          "user" : "-Mo-dQtTV9UMHTLCAPjj"
+        },
+        "-Mo-dUvBpdz9uBbZetu0" : {
+          "score" : "0.25",
+          "stake" : "0.6",
+          "user" : "-Mo-dTj66e5Y9l-0QG1F"
+        },
+        "-Mo-dYhCvqzmqamHTmca" : {
+          "score" : "0.75",
+          "stake" : "0.2",
+          "user" : "-Mo-dXTn2O8h-PWzNI1W"
+        },
+        "-Mo-da4lttcnnqKxH3ge" : {
+          "score" : "0.45",
+          "stake" : "0.35",
+          "user" : "-Mo-dZyvZ3LsMd58NuFi"
+        }
+      },
+      "description" : "Lorem Ipsum Patent",
+      "history" : {
+        "iteration_1" : "median"
+      },
+      "name" : "test A"
+    }
+  },
+  "users" : {
+    "-Mo-dGkx_N1Xk9ZVx3rL" : {
+      "capital" : 0.15000000000000002,
+      "id" : "5987014072142386",
+      "status" : "started"
+    },
+    "-Mo-dLlORVVQwF1MUES2" : {
+      "capital" : 1,
+      "id" : "8062608764608408",
+      "status" : "started"
+    },
+    "-Mo-dLuWVfl5w_JxZ-_6" : {
+      "capital" : 0.19999999999999996,
+      "id" : "42109816488852814",
+      "status" : "started"
+    },
+    "-Mo-dO2FrS32SX9CNP_i" : {
+      "capital" : 1,
+      "id" : "7137766849309324",
+      "status" : "started"
+    },
+    "-Mo-dOCaXxfrV95QeorA" : {
+      "capital" : 0.7,
+      "id" : "9212695170068688",
+      "status" : "started"
+    },
+    "-Mo-dQje7BVHe07ze2vv" : {
+      "capital" : 1,
+      "id" : "40961256946764024",
+      "status" : "started"
+    },
+    "-Mo-dQtTV9UMHTLCAPjj" : {
+      "capital" : 0.75,
+      "id" : "34187960489375535",
+      "status" : "started"
+    },
+    "-Mo-dTaEGKzmBSgzOgZ8" : {
+      "capital" : 1,
+      "id" : "20729925699103546",
+      "status" : "started"
+    },
+    "-Mo-dTj66e5Y9l-0QG1F" : {
+      "capital" : 0.4,
+      "id" : "40514194409652093",
+      "status" : "started"
+    },
+    "-Mo-dXDlxngrQu9uhTZ1" : {
+      "capital" : 1,
+      "id" : "49926016238509563",
+      "status" : "started"
+    },
+    "-Mo-dXTn2O8h-PWzNI1W" : {
+      "capital" : 0.8,
+      "id" : "6263686303052849",
+      "status" : "started"
+    },
+    "-Mo-dZpj8LVrNp8QwLno" : {
+      "capital" : 1,
+      "id" : "9628121178995686",
+      "status" : "started"
+    },
+    "-Mo-dZyvZ3LsMd58NuFi" : {
+      "capital" : 0.65,
+      "id" : "27925291308772304",
+      "status" : "started"
+    }
+  }
+}
