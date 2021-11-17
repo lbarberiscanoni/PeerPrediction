@@ -37,7 +37,7 @@ const Home = () => {
 
   const [itemNum, newItem] = useState(0)
 
-  const [snapshots, loading, error] = useList(firebase.database().ref('/'));
+  const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
   const [user_id, changeUser] = useState("default")
 
@@ -46,6 +46,7 @@ const Home = () => {
   const vote = () => {
 
     //first, check the stake of the user to see that they are not over-betting
+    console.log(Object.keys(snapshots[1].val()), user_id)
     const available_capital = snapshots[1].val()[user_id].capital
 
     if (stake > available_capital) {
@@ -74,7 +75,7 @@ const Home = () => {
       if (current_bid.length > 0) {
         firebase
           .database()
-          .ref("/")
+          .ref("/schelling/")
           .child("items")
           .child(item_id)
           .child("current_bids")
@@ -83,7 +84,7 @@ const Home = () => {
       } else {
         firebase
           .database()
-          .ref("/")
+          .ref("/schelling/")
           .child("items")
           .child(item_id)
           .child("current_bids")
@@ -94,7 +95,7 @@ const Home = () => {
       update["capital"] = available_capital - stake
       firebase
         .database()
-        .ref("/")
+        .ref("/schelling/")
         .child("users")
         .child(user_id.toString())
         .update(update)
@@ -112,7 +113,7 @@ const Home = () => {
 
     firebase
       .database()
-      .ref("/")
+      .ref("/schelling/")
       .child("users")
       .push(user)
       .then((snapshot) => {
@@ -123,7 +124,7 @@ const Home = () => {
   if (snapshots.length > 1) {
     if (hasVoted) {
       return(
-        <h1>Here's your code: { user_id }</h1>
+        <h1>Here is your code: { user_id }</h1>
       )
     } else {
       let current_item = Object.values(snapshots[0].val())[itemNum]
@@ -166,20 +167,4 @@ const Home = () => {
     )
   }
 }
-
-        // <div>
-        //   <h3>Your Bets ({ user_id })</h3>
-        //   <h5>available_capital: { snapshots[1].val()[user_id].capital }</h5>
-        // </div>
-                  // <label>Stake</label>
-          // <input 
-          //   type="range" 
-          //   className="form-range" 
-          //   min="0" 
-          //   max="1" 
-          //   defaultValue="0.5" 
-          //   step="0.05" 
-          //   onChange={(e) => { updateStake(e.target.value) }} 
-          // />
-          // <h5>{ stake }</h5>
 export default Home;
