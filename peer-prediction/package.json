@@ -9,12 +9,14 @@
   },
   "dependencies": {
     "autoprefixer": "^10.3.7",
+    "d3": "^7.1.1",
     "firebase": "^8.2.5",
     "next": "11.1.2",
     "postcss": "^8.3.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-firebase-hooks": "^3.0.4",
+    "simple-statistics": "^7.7.0",
     "tailwindcss": "^2.2.17"
   }
 }
