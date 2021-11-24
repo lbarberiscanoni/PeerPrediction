@@ -41,6 +41,8 @@ const Home = () => {
 
   const [user_id, changeUser] = useState("default")
 
+  const [workerID, changeWorkerID] = useState("")
+
   const [hasVoted, updateVote] = useState(false)
 
   const vote = () => {
@@ -107,7 +109,7 @@ const Home = () => {
 
   const registerUser = () => {
     let user = {}
-    user["id"] = Math.random().toString().split(".")[1]
+    user["id"] = workerID
     user["capital"] = 1
     user["status"] = "started"
 
@@ -121,47 +123,83 @@ const Home = () => {
       })  
   }
 
-  if (snapshots.length > 1) {
-    if (hasVoted) {
-      return(
-        <h1>Here is your code: { user_id }</h1>
-      )
-    } else {
-      let current_item = Object.values(snapshots[0].val())[itemNum]
-      return (
-        <div>
-          <h1>Conspiracy Coin</h1>
-          <h3>Instructions</h3>
-          <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-          <p>Read up on the theory through the link above, and feel free to do your own research before answering</p>
-          <h2 dangerouslySetInnerHTML={{ __html: current_item.description }}></h2>
-          <div>
-            <label>0 is not at all, 100 is absolutely certain</label>
-            <br />
-            <input 
-              type="range" 
-              className="form-range" 
-              min="0" 
-              max="1" 
-              defaultValue="0.5" 
-              step="0.01" 
-              onChange={(e) => { updateScore(e.target.value) }} 
-            />
-            <h3>{ score * 100}%</h3>
+  const handleChange = (e) => {
+    changeWorkerID(e.target.value)
+  }
 
-            <button
-              onClick={
-                () => vote()
-              }
-              >
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    registerUser()
+  }
+
+  if (snapshots.length > 1) {
+    if (user_id == "default") {
+      return(
+        <div>
+          <h1>Login</h1>
+          <form 
+              onSubmit={handleSubmit}
+          >
+            <div className="col">
+              <textarea 
+                placeholder="Put in your Worker ID" 
+                className="form-control"
+                value={workerID}
+                onChange={handleChange}
+                columns="30"
+                rows="3"
+              />
+            </div>
+            <div className="col">
+              <button className="btn btn-primary">
                 Submit
-            </button>
-          </div>
+              </button>
+
+            </div>
+          </form>
         </div>
       )
+    } else {
+      if (hasVoted) {
+        return(
+          <h1>Here is your code: { user_id }</h1>
+        )
+      } else {
+        let current_item = Object.values(snapshots[0].val())[itemNum]
+        return (
+          <div>
+            <h1>Conspiracy Coin</h1>
+            <h3>Instructions</h3>
+            <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
+            <p>Read up on the theory through the link above, and feel free to do your own research before answering</p>
+            <h2 dangerouslySetInnerHTML={{ __html: current_item.description }}></h2>
+            <div>
+              <label>0 is not at all, 100 is absolutely certain</label>
+              <br />
+              <input 
+                type="range" 
+                className="form-range" 
+                min="0" 
+                max="1" 
+                defaultValue="0.5" 
+                step="0.01" 
+                onChange={(e) => { updateScore(e.target.value) }} 
+              />
+              <h3>{ score * 100}%</h3>
+
+              <button
+                onClick={
+                  () => vote()
+                }
+                >
+                  Submit
+              </button>
+            </div>
+          </div>
+        )
+      }
     }
   } else {
-    registerUser()
     return(
       <h1>Loading...</h1>
     )
