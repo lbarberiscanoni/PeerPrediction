@@ -174,7 +174,20 @@ const Home = () => {
     } else {
       if (hasVoted) {
         return(
-          <h1>Here is your code: { user_id }</h1>
+          <div>
+            <h1>Here is your code: { user_id }</h1>
+            <h1 className="text-center">You are done!</h1>
+            <h1 className="text-center">Thank you for participating</h1>
+            <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
+            <h3>
+              If you are interested, 
+              <a href="mailto:hllbck7@gmail.com">
+                email us 
+              </a>
+              and we will send you a scheduling form so you can sign up. Please don't spam us lol
+            </h3>
+            <h3>If you are not interested then that's ok too XD</h3>
+          </div>
         )
       } else {
         let current_item = Object.values(snapshots[0].val())[itemNum]
