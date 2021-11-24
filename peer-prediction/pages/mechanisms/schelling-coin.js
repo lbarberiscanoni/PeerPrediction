@@ -113,19 +113,26 @@ const Home = () => {
   }
 
   const registerUser = () => {
-    let user = {}
-    user["id"] = workerID
-    user["capital"] = 1
-    user["status"] = "started"
+    let new_user = {}
+    new_user["id"] = workerID
+    new_user["capital"] = 1
+    new_user["status"] = "started"
 
-    firebase
-      .database()
-      .ref("/schelling/")
-      .child("users")
-      .push(user)
-      .then((snapshot) => {
+
+    //check if the workerID is already in the system to avoid a sybil attack
+    let matching_users = Object.values(snapshots[1].val()).filter(user => user.id === workerID)
+    if (matching_users.length > 0) {
+      alert("look like you've already played the game bc your Worker ID is in the system")
+    } else {
+      firebase
+        .database()
+        .ref("/schelling/")
+        .child("users")
+        .push(new_user)
+        .then((snapshot) => {
         changeUser(snapshot.key)
-      })  
+        }) 
+    }
   }
 
   const handleChange = (e) => {
