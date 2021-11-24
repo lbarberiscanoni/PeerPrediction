@@ -48,12 +48,15 @@ const Home = () => {
   const vote = () => {
 
     //first, check the stake of the user to see that they are not over-betting
-    console.log(Object.keys(snapshots[1].val()), user_id)
     const available_capital = snapshots[1].val()[user_id].capital
 
-    if (stake > available_capital) {
+    if (stake === 0) {
+      alert("you can't bet 0% of your money: increase your stake!")
+    } else if (stake > available_capital) {
       alert("you are betting more money than you have available")
     } else {
+
+      newItem(itemNum + 1)
 
       let item_key = Object.keys(snapshots[0].val())[itemNum]
 
@@ -101,9 +104,11 @@ const Home = () => {
         .child("users")
         .child(user_id.toString())
         .update(update)
-    }
 
-    updateVote(true)
+      if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
+        updateVote(true)
+      }
+    }
 
   }
 
@@ -181,12 +186,23 @@ const Home = () => {
                 className="form-range" 
                 min="0" 
                 max="1" 
-                defaultValue="0.5" 
+                defaultValue="0" 
                 step="0.01" 
                 onChange={(e) => { updateScore(e.target.value) }} 
               />
               <h3>{ score * 100}%</h3>
-
+              <label>How confident are you? I.E. what % of your MTurk payment are you willing to be on this?</label>
+              <br />
+              <input 
+                type="range" 
+                className="form-range" 
+                min="0" 
+                max="1" 
+                defaultValue="0" 
+                step="0.01" 
+                onChange={(e) => { updateStake(e.target.value) }} 
+              />
+              <h3>{ stake }</h3>
               <button
                 onClick={
                   () => vote()
