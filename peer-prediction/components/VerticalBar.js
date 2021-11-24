@@ -63,7 +63,6 @@ const Graph = (props) => {
 
 
   useEffect(() => {
-    console.log(props.scores)
     chart(props.scores)
   }, [])
 

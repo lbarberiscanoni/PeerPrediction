@@ -41,11 +41,20 @@ const Results = () => {
         { snapshots.length > 0 &&
           Object.values(items).map((item) => {
             let scores = []
+            let overall_stakes = 0
+            let weighed_average = 0
             Object.values(item.current_bids).map((bid) => {
-              scores.push(parseFloat(bid.score) * 100)
+              overall_stakes += parseFloat(bid.stake)
             })
-            return <div>
+            Object.values(item.current_bids).map((bid) => {
+              let raw_score = parseFloat(bid.score) * 100 
+              let weighed_score = raw_score * (bid.stake / overall_stakes)
+              scores.push(raw_score)
+              weighed_average += weighed_score
+            })
+            return <div key={weighed_average}>
               <h2 dangerouslySetInnerHTML={{ __html: item.description }}></h2>
+              <h3>Weighed Average: { weighed_average}</h3>
               <h3>Mean: { mean(scores) }</h3>
               <h3> Median: { median(scores) }</h3>
               <h3> SD: { standardDeviation(scores) }</h3>
