@@ -44,7 +44,7 @@ const Home = () => {
 
   const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
-  const [user_id, changeUser] = useState("-MqGChRKLKtRwzwOfDa3")
+  const [user_id, changeUser] = useState("default")
 
   const [workerID, changeWorkerID] = useState("")
 
