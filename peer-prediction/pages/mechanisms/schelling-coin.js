@@ -4,6 +4,11 @@ import firebase from "firebase"
 import { useList } from 'react-firebase-hooks/database';
 import Link from 'next/link'
 
+import 'materialize-css/dist/css/materialize.css';
+
+import Portfolio from "../../components/Portfolio"
+
+
 const firebaseConfig = {
 
   apiKey: "AIzaSyBZoNhqhzSk8w4Quz2od8O6biJ66fO7K-w",
@@ -39,7 +44,7 @@ const Home = () => {
 
   const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
-  const [user_id, changeUser] = useState("default")
+  const [user_id, changeUser] = useState("-MqGChRKLKtRwzwOfDa3")
 
   const [workerID, changeWorkerID] = useState("")
 
@@ -147,7 +152,7 @@ const Home = () => {
   if (snapshots.length > 1) {
     if (user_id == "default") {
       return(
-        <div>
+        <div className="container">
           <h1>Login</h1>
           <form 
               onSubmit={handleSubmit}
@@ -192,48 +197,84 @@ const Home = () => {
       } else {
         let current_item = Object.values(snapshots[0].val())[itemNum]
         return (
-          <div>
-            <h1>Conspiracy Coin</h1>
-            <h3>Instructions</h3>
-            <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-            <p>Read up on the theory through the link above, and feel free to do your own research before answering</p>
-            <h2 dangerouslySetInnerHTML={{ __html: current_item.description }}></h2>
-            <div>
-              <label>0 is not at all, 100 is absolutely certain</label>
-              <br />
-              <input 
-                type="range" 
-                className="form-range" 
-                min="0" 
-                max="1" 
-                defaultValue="0" 
-                step="0.01" 
-                onChange={(e) => { updateScore(e.target.value) }} 
-              />
-              <h3>{ score * 100}%</h3>
-              <label>How confident are you? I.E. what % of your MTurk payment are you willing to bet on this?</label>
-              <br />
-              <input 
-                type="range" 
-                className="form-range" 
-                min="0" 
-                max="1" 
-                defaultValue="0" 
-                step="0.01" 
-                onChange={(e) => { updateStake(e.target.value) }} 
-              />
-              <h3>{ stake * 100}%</h3>
-              <button
-                onClick={
-                  () => vote()
-                }
-                >
-                  Submit
-              </button>
+          <div className="container">
+            <h1 className="center-align">Conspiracy Coin</h1>
+            <div className="row">
+              <h5>Instructions</h5>
+              <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
+              <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
             </div>
-            <div>
-              <h3>How Much Capital You Currently Have Available</h3>
-              <h3>${ snapshots[1].val()[user_id].capital * (1 - stake)} </h3>
+            <div className="row">
+              <div className="col s4 m6 l6">
+                <h4 dangerouslySetInnerHTML={{ __html: current_item.description }}></h4>
+                <h5>{ score * 100}%</h5>
+                <div className="form-group">
+                    <label
+                        className="left"
+                    >
+                      <h6>
+                        Not at all
+                      </h6>
+                    </label>
+                    <label
+                      className="right"
+                    >
+                      <h6>
+                        Absolutely Yes
+                      </h6>
+                    </label>
+                    <input 
+                      type="range" 
+                      className="form-range" 
+                      min="0" 
+                      max="1" 
+                      defaultValue="0" 
+                      step="0.01" 
+                      onChange={(e) => { updateScore(e.target.value) }} 
+                    />
+                </div>
+                <h5>How confident are you? I.E. what % of your Reward are you willing to bet on this?</h5>
+                <h5>{ stake * 100}%</h5>
+                <div className="form-group">
+                    <label
+                        className="left"
+                    >
+                      <h6>
+                        No Confidence
+                      </h6>
+                    </label>
+                    <label
+                      className="right"
+                    >
+                      <h6>
+                        Absolutely Certain
+                      </h6>
+                    </label>
+                    <input 
+                      id="stake"
+                      type="range" 
+                      className="form-range" 
+                      min="0" 
+                      max="1" 
+                      defaultValue="0" 
+                      step="0.01" 
+                      onChange={(e) => { updateStake(e.target.value) }} 
+                    />
+                </div>
+                <button
+                  onClick={
+                    () => vote()
+                  }
+                  >
+                    Submit
+                </button>
+              </div>
+              <div className="col s4 m6 l6">
+                <Portfolio 
+                  user={ user_id }
+                  stake={ stake }
+                />
+              </div>
             </div>
           </div>
         )
