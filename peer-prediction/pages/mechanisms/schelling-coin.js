@@ -130,7 +130,7 @@ const Home = () => {
         .child("users")
         .push(new_user)
         .then((snapshot) => {
-        changeUser(snapshot.key)
+          changeUser(snapshot.key)
         }) 
     }
   }
@@ -211,7 +211,7 @@ const Home = () => {
                 onChange={(e) => { updateScore(e.target.value) }} 
               />
               <h3>{ score * 100}%</h3>
-              <label>How confident are you? I.E. what % of your MTurk payment are you willing to be on this?</label>
+              <label>How confident are you? I.E. what % of your MTurk payment are you willing to bet on this?</label>
               <br />
               <input 
                 type="range" 
@@ -222,7 +222,7 @@ const Home = () => {
                 step="0.01" 
                 onChange={(e) => { updateStake(e.target.value) }} 
               />
-              <h3>{ stake }</h3>
+              <h3>{ stake * 100}%</h3>
               <button
                 onClick={
                   () => vote()
@@ -230,6 +230,10 @@ const Home = () => {
                 >
                   Submit
               </button>
+            </div>
+            <div>
+              <h3>How Much Capital You Currently Have Available</h3>
+              <h3>${ snapshots[1].val()[user_id].capital * (1 - stake)} </h3>
             </div>
           </div>
         )
