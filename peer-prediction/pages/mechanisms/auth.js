@@ -49,8 +49,11 @@ const Auth = () => {
         applicationVerifier.clear()
         return true
       })
+      .then(() => {
+        console.log('here')
+      })
       .catch((error) => {
-        console.log("error")
+        console.log("error", error)
       });
   }
 
@@ -59,19 +62,21 @@ const Auth = () => {
   }
 
   if (snapshots.length > 1) {
-    // login("+1 1234567890")
+    console.log(user)
     return(
       <div>
         <h1>Here</h1>
         <div id="recaptcha-container"></div>
         <button 
+          style={{ display: user? "none": "" }}
           onClick={ () => {
-            login("+1 1234567890")
+            login("+1 8642436724")
           }}
         >
           Login 
         </button>
         <button 
+          style={{ display: user? "": "none" }}
           onClick={ () => {
             logout()
           }}

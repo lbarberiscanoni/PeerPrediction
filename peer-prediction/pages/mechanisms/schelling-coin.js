@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 
 import firebase from "firebase"
 import { useList } from 'react-firebase-hooks/database';
-import Link from 'next/link'
+import { useAuthState } from 'react-firebase-hooks/auth';
+
 
 import 'materialize-css/dist/css/materialize.css';
+import 'react-phone-number-input/style.css'
 
+import PhoneInput from 'react-phone-number-input';
 import Portfolio from "../../components/Portfolio"
 
 
@@ -30,8 +33,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 //have to wait for loading for some reason
+let auth
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth()
 }
 
 const Home = () => {  
@@ -44,16 +49,16 @@ const Home = () => {
 
   const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
-  const [user_id, changeUser] = useState("default")
+  const [user, user_loading, user_error] = useAuthState(firebase.auth());
 
-  const [workerID, changeWorkerID] = useState("")
+  const [phoneID, changePhoneID] = useState()
 
   const [hasVoted, updateVote] = useState(false)
 
   const vote = () => {
 
     //first, check the stake of the user to see that they are not over-betting
-    const available_capital = snapshots[1].val()[user_id].capital
+    const available_capital = snapshots[1].val()[user.uid].capital
 
     if (stake === 0) {
       alert("you can't bet 0% of your money: increase your stake!")
@@ -70,13 +75,13 @@ const Home = () => {
 
       //filter wasn't working here for some reason
       Object.keys(snapshots[0].val()[item_key].current_bids).map((key) => {
-        if (snapshots[0].val()[item_key].current_bids[key]["user"] === user_id) {
+        if (snapshots[0].val()[item_key].current_bids[key]["user"] === user.uid) {
           current_bid.push(key)
         }
       })
 
       let bid = {}
-      bid["user"] = user_id
+      bid["user"] = user.uid
       bid["score"] = score
       bid["stake"] = stake
 
@@ -107,7 +112,7 @@ const Home = () => {
         .database()
         .ref("/schelling/")
         .child("users")
-        .child(user_id.toString())
+        .child(user.uid.toString())
         .update(update)
 
       if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
@@ -117,54 +122,70 @@ const Home = () => {
 
   }
 
+  const login = (phoneNumber) => { 
+    console.log(phoneNumber)
+    const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+    auth.signInWithPhoneNumber(phoneNumber, applicationVerifier)
+      .then((confirmationResult) => {
+        const verificationCode = window.prompt('Please enter the verification ' + 'code that was sent to your mobile device.');
+        confirmationResult.confirm(verificationCode)
+        applicationVerifier.clear()
+        return true
+      })
+      .then(() => {
+        registerUser()
+      })
+      .catch((error) => {
+        console.log("error", error)
+      });
+  }
+
+  const logout = () => {
+    auth.signOut()
+  }
+
   const registerUser = () => {
     let new_user = {}
-    new_user["id"] = workerID
     new_user["capital"] = 1
     new_user["status"] = "started"
+    new_user["phone"] = phoneID
 
-
-    //check if the workerID is already in the system to avoid a sybil attack
-    let matching_users = Object.values(snapshots[1].val()).filter(user => user.id === workerID)
+    // check if the workerID is already in the system to avoid a sybil attack
+    let matching_users = Object.values(snapshots[1].val()).filter(player => player.phone === phoneID)
     if (matching_users.length > 0) {
       alert("look like you've already played the game bc your Worker ID is in the system")
     } else {
+      const name = window.prompt("loooks like you joining us for the first time: let's get you signed up! \n" + "what's your name?")
+      new_user["id"] = name
       firebase
         .database()
         .ref("/schelling/")
         .child("users")
-        .push(new_user)
-        .then((snapshot) => {
-          changeUser(snapshot.key)
-        }) 
+        .push(new_user) 
     }
-  }
-
-  const handleChange = (e) => {
-    changeWorkerID(e.target.value)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    registerUser()
+    // logout()
+    login(phoneID)
   }
 
   if (snapshots.length > 1) {
-    if (user_id == "default") {
+    console.log(user)
+    if (user == null) {
       return(
         <div className="container">
           <h1>Login</h1>
+          <div id="recaptcha-container"></div>
           <form 
               onSubmit={handleSubmit}
           >
             <div className="col">
-              <textarea 
-                placeholder="Put in your Worker ID" 
-                className="form-control"
-                value={workerID}
-                onChange={handleChange}
-                columns="30"
-                rows="3"
+              <PhoneInput
+                placeholder="Enter phone number"
+                value={phoneID}
+                onChange={changePhoneID}
               />
             </div>
             <div className="col">
@@ -180,7 +201,7 @@ const Home = () => {
       if (hasVoted) {
         return(
           <div>
-            <h1>Here is your code: { user_id }</h1>
+            <h1>Here is your code: { user.uid }</h1>
             <h1 className="text-center">You are done!</h1>
             <h1 className="text-center">Thank you for participating</h1>
             <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
@@ -270,10 +291,13 @@ const Home = () => {
                 </button>
               </div>
               <div className="col s4 m6 l6">
-                <Portfolio 
-                  user={ user_id }
-                  stake={ stake }
-                />
+                <button 
+                  onClick={ () => {
+                    logout()
+                  }}
+                >
+                  Logout 
+                </button>
               </div>
             </div>
           </div>
@@ -287,3 +311,10 @@ const Home = () => {
   }
 }
 export default Home;
+
+              // <div className="col s4 m6 l6">
+              //   <Portfolio 
+              //     user={ user.uid }
+              //     stake={ stake }
+              //   />
+              // </div>
