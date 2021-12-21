@@ -51,14 +51,20 @@ const Home = () => {
 
   const [user, user_loading, user_error] = useAuthState(firebase.auth());
 
-  const [user_id, changeUser] = useState()
-
   const [phoneID, changePhoneID] = useState()
 
   const [hasVoted, updateVote] = useState(false)
 
+  const findUserKey = () => {
+    const users = snapshots[1].val()
+    const allUsersWithThisUiD = Object.keys(users).filter(key => users[key].id === user.uid)
+
+    return allUsersWithThisUiD
+  }
+
   const vote = () => {
 
+    const user_id = findUserKey()[0]
     //first, check the stake of the user to see that they are not over-betting
     const available_capital = snapshots[1].val()[user_id].capital
 
@@ -125,7 +131,6 @@ const Home = () => {
   }
 
   const login = (phoneNumber) => { 
-    console.log(phoneNumber)
     const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
     auth.signInWithPhoneNumber(phoneNumber, applicationVerifier)
       .then((confirmationResult) => {
@@ -151,6 +156,7 @@ const Home = () => {
     new_user["capital"] = 1
     new_user["status"] = "started"
     new_user["phone"] = phoneID
+    new_user["id"] = user.uid
 
     // check if the workerID is already in the system to avoid a sybil attack
     let matching_users = Object.values(snapshots[1].val()).filter(player => player.phone === phoneID)
@@ -158,13 +164,14 @@ const Home = () => {
       alert("look like you've already played the game bc your Worker ID is in the system")
     } else {
       const name = window.prompt("loooks like you joining us for the first time: let's get you signed up! \n" + "what's your name?")
-      new_user["id"] = name
+      new_user["user_name"] = name
       firebase
         .database()
         .ref("/schelling/")
         .child("users")
         .push(new_user) 
         .then((snapshot) => {
+          console.log("fired")
           changeUser(snapshot.key)
         })
     }
@@ -176,7 +183,6 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
-    console.log(user)
     if (user == null) {
       return(
         <div className="container">
@@ -204,7 +210,7 @@ const Home = () => {
       if (hasVoted) {
         return(
           <div>
-            <h1>Here is your code: { user_id }</h1>
+            <h1>Here is your code: { findUserKey()[0] }</h1>
             <h1 className="text-center">You are done!</h1>
             <h1 className="text-center">Thank you for participating</h1>
             <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
@@ -294,7 +300,10 @@ const Home = () => {
                 </button>
               </div>
               <div className="col s4 m6 l6">
-                <h5>{ user_id }</h5>
+                <Portfolio 
+                  user={ findUserKey()[0] }
+                  stake={ stake }
+                />
                 <button 
                   onClick={ () => {
                     logout()
@@ -316,9 +325,3 @@ const Home = () => {
 }
 export default Home;
 
-              // <div className="col s4 m6 l6">
-              //   <Portfolio 
-              //     user={ user_id }
-              //     stake={ stake }
-              //   />
-              // </div>

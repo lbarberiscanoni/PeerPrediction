@@ -41,7 +41,7 @@ const Leaderboard = () => {
 
     let players = {}
     Object.values(users).map((user) => {
-      players[user.id] = 0
+      players[user.user_id] = 0
     })
 
     Object.values(items).map((item) => {
@@ -66,7 +66,7 @@ const Leaderboard = () => {
       Object.values(item.current_bids).map((bid) => {
         let performance = Math.abs(zScore(parseFloat(bid.score) * 100, weighed_average, sd))
         try {
-          players[users[bid.user].id] += performance
+          players[users[bid.user].user_name] += performance
         } catch {
           console.log("skipping ", bid)
         }
