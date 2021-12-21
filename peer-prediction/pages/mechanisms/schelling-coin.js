@@ -51,6 +51,8 @@ const Home = () => {
 
   const [user, user_loading, user_error] = useAuthState(firebase.auth());
 
+  const [user_id, changeUser] = useState()
+
   const [phoneID, changePhoneID] = useState()
 
   const [hasVoted, updateVote] = useState(false)
@@ -58,7 +60,7 @@ const Home = () => {
   const vote = () => {
 
     //first, check the stake of the user to see that they are not over-betting
-    const available_capital = snapshots[1].val()[user.uid].capital
+    const available_capital = snapshots[1].val()[user_id].capital
 
     if (stake === 0) {
       alert("you can't bet 0% of your money: increase your stake!")
@@ -75,13 +77,13 @@ const Home = () => {
 
       //filter wasn't working here for some reason
       Object.keys(snapshots[0].val()[item_key].current_bids).map((key) => {
-        if (snapshots[0].val()[item_key].current_bids[key]["user"] === user.uid) {
+        if (snapshots[0].val()[item_key].current_bids[key]["user"] === user_id) {
           current_bid.push(key)
         }
       })
 
       let bid = {}
-      bid["user"] = user.uid
+      bid["user"] = user_id
       bid["score"] = score
       bid["stake"] = stake
 
@@ -112,7 +114,7 @@ const Home = () => {
         .database()
         .ref("/schelling/")
         .child("users")
-        .child(user.uid.toString())
+        .child(user_id.toString())
         .update(update)
 
       if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
@@ -162,12 +164,14 @@ const Home = () => {
         .ref("/schelling/")
         .child("users")
         .push(new_user) 
+        .then((snapshot) => {
+          changeUser(snapshot.key)
+        })
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // logout()
     login(phoneID)
   }
 
@@ -192,7 +196,6 @@ const Home = () => {
               <button className="btn btn-primary">
                 Submit
               </button>
-
             </div>
           </form>
         </div>
@@ -201,7 +204,7 @@ const Home = () => {
       if (hasVoted) {
         return(
           <div>
-            <h1>Here is your code: { user.uid }</h1>
+            <h1>Here is your code: { user_id }</h1>
             <h1 className="text-center">You are done!</h1>
             <h1 className="text-center">Thank you for participating</h1>
             <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
@@ -291,6 +294,7 @@ const Home = () => {
                 </button>
               </div>
               <div className="col s4 m6 l6">
+                <h5>{ user_id }</h5>
                 <button 
                   onClick={ () => {
                     logout()
@@ -314,7 +318,7 @@ export default Home;
 
               // <div className="col s4 m6 l6">
               //   <Portfolio 
-              //     user={ user.uid }
+              //     user={ user_id }
               //     stake={ stake }
               //   />
               // </div>
