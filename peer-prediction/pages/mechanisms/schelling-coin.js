@@ -301,10 +301,16 @@ const Home = () => {
                 </button>
               </div>
               <div className="col s12 m6 l6">
+              {
+                user === "null" ? 
                 <Portfolio 
                   user={ findUserKey()[0] }
                   stake={ stake }
                 />
+                :
+                <p>Couldn't load the Portfolio</p>
+              }
+                
                 <button 
                   onClick={ () => {
                     logout()
