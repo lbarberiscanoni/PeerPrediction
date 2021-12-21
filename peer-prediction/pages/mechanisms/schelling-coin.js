@@ -183,6 +183,7 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
+    // console.log(user, user.uid, findUserKey())
     if (user == null) {
       return(
         <div className="container">
@@ -302,13 +303,14 @@ const Home = () => {
               </div>
               <div className="col s12 m6 l6">
               {
-                user === "null" ? 
+                user === null ? 
                 <Portfolio 
                   user={ findUserKey()[0] }
                   stake={ stake }
                 />
                 :
                 <p>Couldn't load the Portfolio</p>
+
               }
                 
                 <button 
