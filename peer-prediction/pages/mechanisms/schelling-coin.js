@@ -235,7 +235,7 @@ const Home = () => {
               <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
             </div>
             <div className="row">
-              <div className="col s4 m6 l6">
+              <div className="col s12 m6 l6">
                 <h4 dangerouslySetInnerHTML={{ __html: current_item.description }}></h4>
                 <h5>{ score * 100}%</h5>
                 <div className="form-group">
@@ -292,6 +292,7 @@ const Home = () => {
                     />
                 </div>
                 <button
+                  className="btn-large"
                   onClick={
                     () => vote()
                   }
@@ -299,7 +300,7 @@ const Home = () => {
                     Submit
                 </button>
               </div>
-              <div className="col s4 m6 l6">
+              <div className="col s12 m6 l6">
                 <Portfolio 
                   user={ findUserKey()[0] }
                   stake={ stake }
