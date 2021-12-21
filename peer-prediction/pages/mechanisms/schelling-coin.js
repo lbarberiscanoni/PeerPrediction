@@ -33,10 +33,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 //have to wait for loading for some reason
-let auth
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth()
 }
 
 const Home = () => {  
@@ -46,6 +44,8 @@ const Home = () => {
   const [stake, updateStake] = useState(0)
 
   const [itemNum, newItem] = useState(0)
+
+  const auth = firebase.auth()
 
   const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
