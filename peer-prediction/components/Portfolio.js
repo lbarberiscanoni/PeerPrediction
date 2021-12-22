@@ -10,12 +10,13 @@ const Portfolio = (props) => {
   if (snapshots.length > 1) {
     const items = snapshots[0].val()
     let bets = []
+    let i = 0
     Object.keys(items).map((key) => {
       const prior_bets_made_by_user = Object.values(items[key].current_bids).filter(bid => bid.user === props.user)
-      console.log(prior_bets_made_by_user)
       prior_bets_made_by_user.map((prior_bet) => {
-        let component = <tr><td>{ items[key].name }</td><td>{ parseFloat(prior_bet.score) * 100 }%</td><td>{ parseFloat(prior_bet.stake) * 100 }%</td></tr>
+        let component = <tr key={i}><td>{ items[key].name }</td><td>{ parseFloat(prior_bet.score) * 100 }%</td><td>{ parseFloat(prior_bet.stake) * 100 }%</td></tr>
         bets.push(component)
+        i += 1
       })
     })
     return(

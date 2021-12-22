@@ -33,8 +33,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 //have to wait for loading for some reason
+let auth
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth()
 }
 
 const Home = () => {  
@@ -45,11 +47,11 @@ const Home = () => {
 
   const [itemNum, newItem] = useState(0)
 
-  const auth = firebase.auth()
-
   const [snapshots, loading, error] = useList(firebase.database().ref('/schelling/'));
 
   const [user, user_loading, user_error] = useAuthState(firebase.auth());
+
+  const [user_key, changeUserKey] = useState();
 
   const [phoneID, changePhoneID] = useState()
 
@@ -132,14 +134,14 @@ const Home = () => {
 
   const login = (phoneNumber) => { 
     const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-    auth.signInWithPhoneNumber(phoneNumber, applicationVerifier)
+    firebase.auth().signInWithPhoneNumber(phoneNumber, applicationVerifier)
       .then((confirmationResult) => {
         const verificationCode = window.prompt('Please enter the verification ' + 'code that was sent to your mobile device.');
         confirmationResult.confirm(verificationCode)
         applicationVerifier.clear()
         return true
       })
-      .then(() => {
+      .then(() => { 
         registerUser()
       })
       .catch((error) => {
@@ -148,7 +150,7 @@ const Home = () => {
   }
 
   const logout = () => {
-    auth.signOut()
+    firebase.auth().signOut()
   }
 
   const registerUser = () => {
@@ -156,7 +158,6 @@ const Home = () => {
     new_user["capital"] = 1
     new_user["status"] = "started"
     new_user["phone"] = phoneID
-    new_user["id"] = user.uid
 
     // check if the workerID is already in the system to avoid a sybil attack
     let matching_users = Object.values(snapshots[1].val()).filter(player => player.phone === phoneID)
@@ -165,6 +166,8 @@ const Home = () => {
     } else {
       const name = window.prompt("loooks like you joining us for the first time: let's get you signed up! \n" + "what's your name?")
       new_user["user_name"] = name
+      new_user["id"] = ""
+
       firebase
         .database()
         .ref("/schelling/")
@@ -172,7 +175,7 @@ const Home = () => {
         .push(new_user) 
         .then((snapshot) => {
           console.log("fired")
-          changeUser(snapshot.key)
+          changeUserKey(snapshot.key)
         })
     }
   }
@@ -183,7 +186,6 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
-    // console.log(user, user.uid, findUserKey())
     if (user == null) {
       return(
         <div className="container">
@@ -208,6 +210,16 @@ const Home = () => {
         </div>
       )
     } else {
+      if (findUserKey().length < 1) {
+        let update = {}
+        update["id"] = user.uid
+        firebase
+          .database()
+          .ref("/schelling/")
+          .child("users")
+          .child(user_key)
+          .update(update)
+      }
       if (hasVoted) {
         return(
           <div>
@@ -304,12 +316,12 @@ const Home = () => {
               <div className="col s12 m6 l6">
               {
                 user === null ? 
+                <p>Couldn't load the Portfolio</p>
+                :
                 <Portfolio 
                   user={ findUserKey()[0] }
                   stake={ stake }
                 />
-                :
-                <p>Couldn't load the Portfolio</p>
 
               }
                 
