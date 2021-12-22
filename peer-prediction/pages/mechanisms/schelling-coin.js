@@ -55,7 +55,7 @@ const Home = () => {
 
   const [phoneID, changePhoneID] = useState()
 
-  const [hasVoted, updateVote] = useState(false)
+  const [hasPlacedBet, updateBet] = useState(false)
 
   const findUserKey = () => {
     const users = snapshots[1].val()
@@ -64,31 +64,25 @@ const Home = () => {
     return allUsersWithThisUiD
   }
 
-  const vote = () => {
+  const bet = () => {
 
     const user_id = findUserKey()[0]
-    //first, check the stake of the user to see that they are not over-betting
+
+    let item_key = Object.keys(snapshots[0].val())[itemNum]
+
+    //first, let's check if the user has already staked on this question, in which case we will just update the bid
+    let current_bid = []
+
+    //filter wasn't working here for some reason
+    Object.keys(snapshots[0].val()[item_key].current_bids).map((key) => {
+      if (snapshots[0].val()[item_key].current_bids[key]["user"] === user_id) {
+        current_bid.push(key)
+      }
+    })
+
+    //second, check the stake of the user to see that they are not over-betting
     const available_capital = snapshots[1].val()[user_id].capital
 
-    if (stake === 0) {
-      alert("you can't bet 0% of your money: increase your stake!")
-    } else if (stake > available_capital) {
-      alert("you are betting more money than you have available")
-    } else {
-
-      newItem(itemNum + 1)
-
-      let item_key = Object.keys(snapshots[0].val())[itemNum]
-
-      //second, let's check if the user has already staked on this question, in which case we will just update the bid
-      let current_bid = []
-
-      //filter wasn't working here for some reason
-      Object.keys(snapshots[0].val()[item_key].current_bids).map((key) => {
-        if (snapshots[0].val()[item_key].current_bids[key]["user"] === user_id) {
-          current_bid.push(key)
-        }
-      })
 
       let bid = {}
       bid["user"] = user_id
@@ -96,39 +90,59 @@ const Home = () => {
       bid["stake"] = stake
 
       const item_id = Object.keys(snapshots[0].val())[itemNum]
+      const item = snapshots[0].val()[item_id]
 
-      if (current_bid.length > 0) {
-        firebase
-          .database()
-          .ref("/schelling/")
-          .child("items")
-          .child(item_id)
-          .child("current_bids")
-          .child(current_bid[0])
-          .update(bid)
-      } else {
-        firebase
-          .database()
-          .ref("/schelling/")
-          .child("items")
-          .child(item_id)
-          .child("current_bids")
-          .push(bid)
-      }
 
       let update = {}
-      update["capital"] = available_capital - stake
-      firebase
-        .database()
-        .ref("/schelling/")
-        .child("users")
-        .child(user_id.toString())
-        .update(update)
 
-      if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
-        updateVote(true)
+      if (current_bid.length > 0) {
+        const updatedCapital = available_capital + parseFloat(item.current_bids[current_bid[0]].stake) - stake
+
+        if (updatedCapital < 0) {
+          alert("you are betting more money than you have available") 
+        } else {
+          firebase
+            .database()
+            .ref("/schelling/")
+            .child("items")
+            .child(item_id)
+            .child("current_bids")
+            .child(current_bid[0])
+            .update(bid)
+
+          update["capital"] = available_capital + parseFloat(item.current_bids[current_bid[0]].stake) - stake
+        }
+      } else {
+        if (stake > available_capital) {
+          alert("you are betting more money than you have available") 
+        } else {
+          firebase
+            .database()
+            .ref("/schelling/")
+            .child("items")
+            .child(item_id)
+            .child("current_bids")
+            .push(bid)
+
+          update["capital"] = available_capital - stake
+        }
+      } 
+
+      if (Object.entries(update).length > 0) {
+        firebase
+          .database()
+          .ref("/schelling/")
+          .child("users")
+          .child(user_id.toString())
+          .update(update)
+
+        if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
+          updateBet(true)
+        } else {
+          newItem(itemNum + 1)
+        }
       }
-    }
+      
 
   }
 
@@ -220,7 +234,7 @@ const Home = () => {
           .child(user_key)
           .update(update)
       }
-      if (hasVoted) {
+      if (hasPlacedBet) {
         return(
           <div>
             <h1>Here is your code: { findUserKey()[0] }</h1>
@@ -307,7 +321,7 @@ const Home = () => {
                 <button
                   className="btn-large"
                   onClick={
-                    () => vote()
+                    () => bet()
                   }
                   >
                     Submit
@@ -320,7 +334,6 @@ const Home = () => {
                 :
                 <Portfolio 
                   user={ findUserKey()[0] }
-                  stake={ stake }
                 />
 
               }

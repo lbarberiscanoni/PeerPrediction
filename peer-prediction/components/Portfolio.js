@@ -34,7 +34,7 @@ const Portfolio = (props) => {
             { bets }
           </tbody>
         </table>
-        <h5>${ snapshots[1].val()[props.user].capital * (1 - props.stake) } available</h5>
+        <h5>${ snapshots[1].val()[props.user].capital } available</h5>
       </div>
     )
   } else {
