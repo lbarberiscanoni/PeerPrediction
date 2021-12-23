@@ -53,7 +53,12 @@ const Results = () => {
               weighed_average += weighed_score
             })
             return <div key={weighed_average}>
-              <h2 dangerouslySetInnerHTML={{ __html: item.description }}></h2>
+              <a
+                target="_blank"
+                href={ item.link }
+              >
+                <h2> { item.description } </h2>
+              </a>
               <h3>Weighed Average: { weighed_average}</h3>
               <h3>Mean: { mean(scores) }</h3>
               <h3> Median: { median(scores) }</h3>

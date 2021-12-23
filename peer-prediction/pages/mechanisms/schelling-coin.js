@@ -289,7 +289,15 @@ const Home = () => {
             </div>
             <div className="row">
               <div className="col s12 m6 l6">
-                <h4 dangerouslySetInnerHTML={{ __html: current_item.description }}></h4>
+                <h4>
+                  What is the probability that 
+                  <a 
+                    target="_blank"
+                    href= { current_item.link }
+                  >
+                    { current_item.description }
+                  </a>
+                </h4>
                 <h5>{ score * 100}%</h5>
                 <div className="form-group">
                     <label
