@@ -64,11 +64,37 @@ const Home = () => {
     return allUsersWithThisUiD
   }
 
+  const getActiveMarkets = () => {
+    let activeMarkets = []
+
+    const markets = Object.keys(snapshots[0].val())
+
+    markets.map((key) => {
+      let market = snapshots[0].val()[key]
+
+      const endDate = new Date(
+        market.duration.end.split("-")[2], 
+        market.duration.end.split("-")[0] - 1, 
+        market.duration.end.split("-")[1])
+      const startDate = new Date(
+        market.duration.start.split("-")[2], 
+        market.duration.start.split("-")[0] - 1, 
+        market.duration.start.split("-")[1])
+      const today = new Date(Date.now())
+
+      if (startDate < today && today < endDate) {
+        activeMarkets.push(key)
+      }
+    })
+
+    return activeMarkets
+  }
+
   const bet = () => {
 
     const user_id = findUserKey()[0]
 
-    let item_key = Object.keys(snapshots[0].val())[itemNum]
+    let item_key = getActiveMarkets()[itemNum]
 
     //first, let's check if the user has already staked on this question, in which case we will just update the bid
     let current_bid = []
@@ -89,8 +115,7 @@ const Home = () => {
       bid["score"] = score
       bid["stake"] = stake
 
-      const item_id = Object.keys(snapshots[0].val())[itemNum]
-      const item = snapshots[0].val()[item_id]
+      const item = snapshots[0].val()[item_key]
 
 
       let update = {}
@@ -105,7 +130,7 @@ const Home = () => {
             .database()
             .ref("/schelling/")
             .child("items")
-            .child(item_id)
+            .child(item_key)
             .child("current_bids")
             .child(current_bid[0])
             .update(bid)
@@ -120,7 +145,7 @@ const Home = () => {
             .database()
             .ref("/schelling/")
             .child("items")
-            .child(item_id)
+            .child(item_key)
             .child("current_bids")
             .push(bid)
 
@@ -136,7 +161,7 @@ const Home = () => {
           .child(user_id.toString())
           .update(update)
 
-        if (itemNum >= (Object.keys(snapshots[0].val()).length - 1)) {
+        if (itemNum >= (getActiveMarkets().length - 1)) {
           updateBet(true)
         } else {
           newItem(itemNum + 1)
@@ -200,6 +225,7 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
+    console.log(getActiveMarkets())
     if (user == null) {
       return(
         <div className="container">
@@ -252,7 +278,7 @@ const Home = () => {
           </div>
         )
       } else {
-        let current_item = Object.values(snapshots[0].val())[itemNum]
+        let current_item = snapshots[0].val()[getActiveMarkets()[itemNum]]
         return (
           <div className="container">
             <h1 className="center-align">Conspiracy Coin</h1>
@@ -334,8 +360,8 @@ const Home = () => {
                 :
                 <Portfolio 
                   user={ findUserKey()[0] }
+                  activeMarkets= { getActiveMarkets() }
                 />
-
               }
                 
                 <button 
