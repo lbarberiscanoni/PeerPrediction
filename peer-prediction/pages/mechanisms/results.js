@@ -5,6 +5,8 @@ import { useList } from 'react-firebase-hooks/database';
 import {mean, median, standardDeviation} from 'simple-statistics'
 import VerticalBar from "../../components/VerticalBar"
 
+import 'materialize-css/dist/css/materialize.css';
+
 const firebaseConfig = {
 
   apiKey: "AIzaSyBZoNhqhzSk8w4Quz2od8O6biJ66fO7K-w",
@@ -37,7 +39,7 @@ const Results = () => {
   if (snapshots.length > 1) {
     let items = snapshots[0].val()
     return(
-      <div>
+      <div className="container">
         { snapshots.length > 0 &&
           Object.values(items).map((item) => {
             let scores = []
@@ -52,18 +54,29 @@ const Results = () => {
               scores.push(raw_score)
               weighed_average += weighed_score
             })
-            return <div key={weighed_average}>
-              <a
-                target="_blank"
-                href={ item.link }
-              >
-                <h2> { item.description } </h2>
-              </a>
-              <h3>Weighed Average: { weighed_average}</h3>
-              <h3>Mean: { mean(scores) }</h3>
-              <h3> Median: { median(scores) }</h3>
-              <h3> SD: { standardDeviation(scores) }</h3>
-              <VerticalBar scores={scores} />
+            return <div 
+              className="row"
+              key={weighed_average}
+            >
+              <div className="col s12 m6 l6">
+                <div className="row">
+                  <a
+                    target="_blank"
+                    href={ item.link }
+                  >
+                    <h3> { item.description } </h3>
+                  </a>
+                </div>
+                <div className="row">
+                  <h5>Weighed Average: { weighed_average}</h5>
+                  <h5>Mean: { mean(scores) }</h5>
+                  <h5> Median: { median(scores) }</h5>
+                  <h5> SD: { standardDeviation(scores) }</h5>
+                </div>
+                <div className="row">
+                  <VerticalBar scores={scores} />
+                </div>
+              </div>
             </div>
           })
         } 
