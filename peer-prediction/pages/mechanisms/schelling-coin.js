@@ -411,7 +411,13 @@ const Home = () => {
                     questionsLeft={ getActiveMarkets().length - 1 }
                     progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
                   />
-                  <h5>${ Object.values(snapshots[1].val()[findUserKey()[0]].capital).pop() } left</h5>
+                  {
+                    findUserKey()[0] ? 
+                      <h5>${ Object.values(snapshots[1].val()[findUserKey()[0]].capital).pop() } left</h5>
+                    :
+                      <h5>""</h5>
+                  }
+                  
                 </div>
               </div>
             </div>
