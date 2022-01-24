@@ -8,7 +8,7 @@ const ProgressBar = (props) => {
         className="progress blue lighten-4 tooltipped" 
         data-position="top" 
       >
-        <span>Progress</span>
+        <span>{ props.questionsLeft + " questions left"}</span>
         <div 
           className="determinate blue" 
           style={{width: (props.progress) + "%", animation: "grow 2s;"}}

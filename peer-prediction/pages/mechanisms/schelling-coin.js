@@ -262,19 +262,25 @@ const Home = () => {
       }
       if (hasPlacedBet) {
         return(
-          <div>
-            <h1>Here is your code: { findUserKey()[0] }</h1>
-            <h1 className="text-center">You are done!</h1>
-            <h1 className="text-center">Thank you for participating</h1>
-            <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
-            <h3>
-              If you are interested, 
-              <a href="mailto:hllbck7@gmail.com">
-                email us 
-              </a>
-              and we will send you a scheduling form so you can sign up. Please don't spam us lol
-            </h3>
-            <h3>If you are not interested then that's ok too XD</h3>
+          <div className="container">
+            <div className="row">
+              <h3 className="text-center">You are done!</h3>
+              <h3 className="text-center">Thank you for participating</h3>
+            </div>
+            <div className="row">
+              <h3>If you are coming from Amazon Mechanical Turk or Prolific, here is your code: { findUserKey()[0] }</h3>
+            </div>
+            <div className="row">
+              <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
+              <h3>
+                If you are interested, 
+                <a href="mailto:hllbck7@gmail.com">
+                  email us 
+                </a>
+                and we will send you a scheduling form so you can sign up. Please don't spam us lol
+              </h3>
+              <h3>If you are not interested then that's ok too XD</h3>
+            </div>
           </div>
         )
       } else {
@@ -283,16 +289,6 @@ const Home = () => {
         return (
           <div className="container">
             <h1 className="center-align">Conspiracy Coin</h1>
-            <div className="row">
-              <h5>Instructions</h5>
-              <p>You have get to the end to get the confirmation code that gets you paid!</p>
-              <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-            </div>
-            <div className="row">
-              <ProgressBar
-                progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
-               />
-            </div>
             <div className="row">
               <div className="col s12 m6 l6">
                 <h4>
@@ -368,23 +364,18 @@ const Home = () => {
                 </button>
               </div>
               <div className="col s12 m6 l6">
-              {
-                user === null ? 
-                <p>Couldn't load the Portfolio</p>
-                :
-                <Portfolio 
-                  user={ findUserKey()[0] }
-                  activeMarkets= { getActiveMarkets() }
+                <div className="row">
+                  <h5>Instructions</h5>
+                  <p>You are trying to guess the average of how everybody else answered the question</p>
+                  <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
+                  <p>You have get to the end to get the confirmation code that gets you paid!</p>
+                  <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
+                </div>
+                <ProgressBar
+                  questionsLeft={ getActiveMarkets.length - itemNum + 1 }
+                  progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
                 />
-              }
-                
-                <button 
-                  onClick={ () => {
-                    logout()
-                  }}
-                >
-                  Logout 
-                </button>
+                <h5>${ snapshots[1].val()[findUserKey()[0]].capital } available</h5>
               </div>
             </div>
           </div>

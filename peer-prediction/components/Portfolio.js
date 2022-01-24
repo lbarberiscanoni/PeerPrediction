@@ -12,13 +12,36 @@ const Portfolio = (props) => {
     let bets = []
     let i = 0
     props.activeMarkets.map((key) => {
-      const prior_bets_made_by_user = Object.values(items[key].current_bids).filter(bid => bid.user === props.user)
-      prior_bets_made_by_user.map((prior_bet) => {
-        let component = <tr key={i}><td>{ items[key].name }</td><td>{ parseFloat(prior_bet.score) * 100 }%</td><td>{ parseFloat(prior_bet.stake) * 100 }%</td></tr>
-        bets.push(component)
-        i += 1
-      })
+      const prior_bet = Object.values(items[key].current_bids).filter(bid => bid.user === props.user)
+      let component = ""
+      if (prior_bet.length > 0) {
+        component = <tr key={i}>
+          <td
+            onClick={ () => {
+              changeView(items[key].name)
+              newItem(Object.keys(items).indexOf(key))
+            }}
+          >
+            <a href="#">
+              { items[key].name }
+            </a>              </td>
+          <td>{ parseFloat(prior_bet[0].score) * 100 }%</td>
+          <td>{ parseFloat(prior_bet[0].stake) * 100 }%</td>
+        </tr>
+      } else {
+        component = <tr key={i}>
+          <td>
+            <a href="#">
+              { items[key].name }
+            </a>
+          </td>
+          <td> -- </td>
+          <td> -- </td>
+        </tr>
+      }
+      bets.push(component)
     })
+
     return(
       <div>
         <h3>Portfolio</h3>
