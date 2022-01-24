@@ -248,7 +248,7 @@ const Home = () => {
 
   const registerUser = () => {
     let new_user = {}
-    new_user["capital"] = 1
+    new_user["capital"] = {"asdfa": 1}
     new_user["status"] = "started"
     new_user["phone"] = phoneID
 
