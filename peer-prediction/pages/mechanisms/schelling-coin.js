@@ -11,6 +11,7 @@ import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input';
 import Portfolio from "../../components/Portfolio";
 import ProgressBar from "../../components/ProgressBar";
+import FinalMessage from "../../components/FinalMessage";
 
 const firebaseConfig = {
 
@@ -83,7 +84,10 @@ const Home = () => {
       const today = new Date(Date.now())
 
       if (startDate < today && today < endDate) {
-        activeMarkets.push(key)
+        const prior_bets = Object.values(market.current_bids).filter(bid => bid.user === findUserKey()[0])
+        if (prior_bets.length === 0) {
+          activeMarkets.push(key)
+        }
       }
     })
 
@@ -225,7 +229,6 @@ const Home = () => {
   }
 
   if (snapshots.length > 1) {
-    console.log(getActiveMarkets())
     if (user == null) {
       return(
         <div className="container">
@@ -262,124 +265,115 @@ const Home = () => {
       }
       if (hasPlacedBet) {
         return(
-          <div className="container">
-            <div className="row">
-              <h3 className="text-center">You are done!</h3>
-              <h3 className="text-center">Thank you for participating</h3>
-            </div>
-            <div className="row">
-              <h3>If you are coming from Amazon Mechanical Turk or Prolific, here is your code: { findUserKey()[0] }</h3>
-            </div>
-            <div className="row">
-              <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
-              <h3>
-                If you are interested, 
-                <a href="mailto:hllbck7@gmail.com">
-                  email us 
-                </a>
-                and we will send you a scheduling form so you can sign up. Please don't spam us lol
-              </h3>
-              <h3>If you are not interested then that's ok too XD</h3>
-            </div>
-          </div>
+          <FinalMessage
+            code={ findUserKey()[0] }
+          />
         )
       } else {
-        let current_item = snapshots[0].val()[getActiveMarkets()[itemNum]]
-        console.log()
-        return (
-          <div className="container">
-            <h1 className="center-align">Conspiracy Coin</h1>
-            <div className="row">
-              <div className="col s12 m6 l6">
-                <h4>
-                  What is the probability that 
-                  <a 
-                    target="_blank"
-                    href= { current_item.link }
-                  >
-                    { current_item.description }
-                  </a>
-                </h4>
-                <h5>{ score * 100}%</h5>
-                <div className="form-group">
-                    <label
-                        className="left"
+        if (getActiveMarkets().length > 0) {
+          let current_item = snapshots[0].val()[getActiveMarkets()[itemNum]]
+          return (
+            <div className="container">
+              <h1 className="center-align">Conspiracy Coin</h1>
+              <div className="row">
+                <div className="col s12 m6 l6">
+                  <h4>
+                    What is the probability that 
+                    <a 
+                      target="_blank"
+                      href= { current_item.link }
                     >
-                      <h6>
-                        Not at all
-                      </h6>
-                    </label>
-                    <label
-                      className="right"
+                      { current_item.description }
+                    </a>
+                  </h4>
+                  <h5>{ score * 100}%</h5>
+                  <div className="form-group">
+                      <label
+                          className="left"
+                      >
+                        <h6>
+                          Not at all
+                        </h6>
+                      </label>
+                      <label
+                        className="right"
+                      >
+                        <h6>
+                          Absolutely Yes
+                        </h6>
+                      </label>
+                      <input 
+                        type="range" 
+                        className="form-range" 
+                        min="0" 
+                        max="1" 
+                        defaultValue="0" 
+                        step="0.01" 
+                        onChange={(e) => { updateScore(e.target.value) }} 
+                      />
+                  </div>
+                  <h5>How confident are you? I.E. what % of your Reward are you willing to bet on this?</h5>
+                  <h5>{ stake * 100}%</h5>
+                  <div className="form-group">
+                      <label
+                          className="left"
+                      >
+                        <h6>
+                          No Confidence
+                        </h6>
+                      </label>
+                      <label
+                        className="right"
+                      >
+                        <h6>
+                          Absolutely Certain
+                        </h6>
+                      </label>
+                      <input 
+                        id="stake"
+                        type="range" 
+                        className="form-range" 
+                        min="0" 
+                        max="1" 
+                        defaultValue="0" 
+                        step="0.01" 
+                        onChange={(e) => { updateStake(e.target.value) }} 
+                      />
+                  </div>
+                  <button
+                    className="btn-large"
+                    onClick={
+                      () => bet()
+                    }
                     >
-                      <h6>
-                        Absolutely Yes
-                      </h6>
-                    </label>
-                    <input 
-                      type="range" 
-                      className="form-range" 
-                      min="0" 
-                      max="1" 
-                      defaultValue="0" 
-                      step="0.01" 
-                      onChange={(e) => { updateScore(e.target.value) }} 
-                    />
+                      Submit
+                  </button>
                 </div>
-                <h5>How confident are you? I.E. what % of your Reward are you willing to bet on this?</h5>
-                <h5>{ stake * 100}%</h5>
-                <div className="form-group">
-                    <label
-                        className="left"
-                    >
-                      <h6>
-                        No Confidence
-                      </h6>
-                    </label>
-                    <label
-                      className="right"
-                    >
-                      <h6>
-                        Absolutely Certain
-                      </h6>
-                    </label>
-                    <input 
-                      id="stake"
-                      type="range" 
-                      className="form-range" 
-                      min="0" 
-                      max="1" 
-                      defaultValue="0" 
-                      step="0.01" 
-                      onChange={(e) => { updateStake(e.target.value) }} 
-                    />
+                <div className="col s12 m6 l6">
+                  <div className="row">
+                    <h5>Instructions</h5>
+                    <p>You are trying to guess the average of how everybody else answered the question</p>
+                    <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
+                    <p>You have get to the end to get the confirmation code that gets you paid!</p>
+                    <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
+                  </div>
+                  <ProgressBar
+                    questionsLeft={ getActiveMarkets.length - itemNum }
+                    progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
+                  />
+                  <h5>${ snapshots[1].val()[findUserKey()[0]].capital } available</h5>
                 </div>
-                <button
-                  className="btn-large"
-                  onClick={
-                    () => bet()
-                  }
-                  >
-                    Submit
-                </button>
-              </div>
-              <div className="col s12 m6 l6">
-                <div className="row">
-                  <h5>Instructions</h5>
-                  <p>You are trying to guess the average of how everybody else answered the question</p>
-                  <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
-                  <p>You have get to the end to get the confirmation code that gets you paid!</p>
-                  <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-                </div>
-                <ProgressBar
-                  questionsLeft={ getActiveMarkets.length - itemNum + 1 }
-                  progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
-                />
-                <h5>${ snapshots[1].val()[findUserKey()[0]].capital } available</h5>
               </div>
             </div>
-          </div>
-        )
+          )
+        } else {
+          return(
+            <div className="container">
+              <h3>No new conspiracies for you to bet on</h3>
+              <h3>Check back later</h3>
+            </div>
+          )
+        }
       }
     }
   } else {
