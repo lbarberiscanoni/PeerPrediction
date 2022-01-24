@@ -9,8 +9,8 @@ import 'materialize-css/dist/css/materialize.css';
 import 'react-phone-number-input/style.css'
 
 import PhoneInput from 'react-phone-number-input';
-import Portfolio from "../../components/Portfolio";
-import ProgressBar from "../../components/ProgressBar";
+import Portfolio from "../../components/Portfolio"
+
 
 const firebaseConfig = {
 
@@ -55,7 +55,7 @@ const Home = () => {
 
   const [phoneID, changePhoneID] = useState()
 
-  const [hasPlacedBet, updateBet] = useState(false)
+  const [view, changeView] = useState("portfolio")
 
   const findUserKey = () => {
     const users = snapshots[1].val()
@@ -162,7 +162,7 @@ const Home = () => {
           .update(update)
 
         if (itemNum >= (getActiveMarkets().length - 1)) {
-          updateBet(true)
+          changeView("end")
         } else {
           newItem(itemNum + 1)
         }
@@ -224,8 +224,12 @@ const Home = () => {
     login(phoneID)
   }
 
+  const round = (num,dec) => {
+    num = Math.round(num+'e'+dec)
+    return Number(num+'e-'+dec)
+  }
+
   if (snapshots.length > 1) {
-    console.log(getActiveMarkets())
     if (user == null) {
       return(
         <div className="container">
@@ -260,38 +264,110 @@ const Home = () => {
           .child(user_key)
           .update(update)
       }
-      if (hasPlacedBet) {
+      if (view == "portfolio") {
+        const items = snapshots[0].val()
+        let bets = []
+        let i = 0
+        getActiveMarkets().map((key) => {
+          const prior_bet = Object.values(items[key].current_bids).filter(bid => bid.user === findUserKey()[0])
+          let component = ""
+          if (prior_bet.length > 0) {
+            component = <tr key={i}>
+              <td
+                onClick={ () => {
+                  changeView(items[key].name)
+                  newItem(Object.keys(items).indexOf(key))
+                }}
+              >
+                <a href="#">
+                  { items[key].name }
+                </a>              </td>
+              <td>{ parseFloat(prior_bet[0].score) * 100 }%</td>
+              <td>{ parseFloat(prior_bet[0].stake) * 100 }%</td>
+            </tr>
+          } else {
+            component = <tr key={i}>
+              <td
+                onClick={ () => {
+                  changeView(items[key].name)
+                  newItem(Object.keys(items).indexOf(key))
+                }}
+              >
+                <a href="#">
+                  { items[key].name }
+                </a>
+              </td>
+              <td> -- </td>
+              <td> -- </td>
+            </tr>
+          }
+          bets.push(component)
+
+        })
         return(
-          <div>
-            <h1>Here is your code: { findUserKey()[0] }</h1>
-            <h1 className="text-center">You are done!</h1>
-            <h1 className="text-center">Thank you for participating</h1>
-            <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
-            <h3>
-              If you are interested, 
-              <a href="mailto:hllbck7@gmail.com">
-                email us 
-              </a>
-              and we will send you a scheduling form so you can sign up. Please don't spam us lol
-            </h3>
-            <h3>If you are not interested then that's ok too XD</h3>
+          <div className="container">
+            <div className="col s12 m6 l6">
+              {
+                user === null ? 
+                <p>Couldn't load the Portfolio</p>
+                :
+                <div>
+                  <h3>Portfolio</h3>
+                  <button 
+                    onClick={ () => {
+                      logout()
+                    }}
+                  >
+                    Logout 
+                  </button>
+                  <h5>${ round(snapshots[1].val()[findUserKey()[0]].capital, 3) } available</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Coin</th>
+                        <th>Probability</th>
+                        <th>Confidence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      { bets } 
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </div>
+        )
+      } else if (view == "end") {
+        return(
+          <div className="container">
+            <div className="row">
+              <h1>Here is your code: { findUserKey()[0] }</h1>
+              <h1 className="text-center">You are done!</h1>
+              <h1 className="text-center">Thank you for participating</h1>
+            </div>
+            <div className="row">
+              <h3>BY THE WAY: We are recruiting for a similar experiment to what you just did but where we pay 2-3 times what we paid you here in order to have multiple people work on this simultaneously </h3>
+              <h3>
+                If you are interested, 
+                <a href="mailto:hllbck7@gmail.com">
+                  email us 
+                </a>
+                and we will send you a scheduling form so you can sign up. Please don't spam us lol
+              </h3>
+              <h3>If you are not interested then that's ok too XD</h3>
+            </div>
           </div>
         )
       } else {
-        let current_item = snapshots[0].val()[getActiveMarkets()[itemNum]]
-        console.log()
+        let current_item = snapshots[0].val()[Object.keys(snapshots[0].val())[itemNum]]
         return (
           <div className="container">
             <h1 className="center-align">Conspiracy Coin</h1>
             <div className="row">
               <h5>Instructions</h5>
-              <p>You have get to the end to get the confirmation code that gets you paid!</p>
               <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
-            </div>
-            <div className="row">
-              <ProgressBar
-                progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
-               />
+              <p>Read up on the theory through the link below, and feel free to do your own research before answering</p>
             </div>
             <div className="row">
               <div className="col s12 m6 l6">
@@ -365,25 +441,6 @@ const Home = () => {
                   }
                   >
                     Submit
-                </button>
-              </div>
-              <div className="col s12 m6 l6">
-              {
-                user === null ? 
-                <p>Couldn't load the Portfolio</p>
-                :
-                <Portfolio 
-                  user={ findUserKey()[0] }
-                  activeMarkets= { getActiveMarkets() }
-                />
-              }
-                
-                <button 
-                  onClick={ () => {
-                    logout()
-                  }}
-                >
-                  Logout 
                 </button>
               </div>
             </div>
