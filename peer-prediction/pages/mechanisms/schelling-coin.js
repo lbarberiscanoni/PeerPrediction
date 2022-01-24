@@ -4,6 +4,7 @@ import firebase from "firebase"
 import { useList } from 'react-firebase-hooks/database';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
+import {mean, median, standardDeviation, quantileRank, sum, zScore, quantile} from 'simple-statistics'
 
 import 'materialize-css/dist/css/materialize.css';
 import 'react-phone-number-input/style.css'
@@ -94,24 +95,81 @@ const Home = () => {
     return activeMarkets
   }
 
+  const payoff = (prediction, confidence) => {
+    let item_key = Object.keys(snapshots[0].val())[itemNum]
+    // let item_key = Object.keys(snapshots[0].val())[1]
+
+
+    let scores = []
+    let overall_stakes = 0
+    Object.values(snapshots[0].val()[item_key].current_bids).map((bid) => {
+      overall_stakes += parseFloat(bid.stake)
+      let raw_score = parseFloat(bid.score) * 100 
+      scores.push(raw_score)
+    })
+
+    let weighed_average = 0
+    Object.values(snapshots[0].val()[item_key].current_bids).map((bid) => {
+      let raw_score = parseFloat(bid.score) * 100 
+      let weight = bid.stake / parseFloat(overall_stakes)
+      let weighed_score = raw_score * weight
+      // console.log(raw_score, weight, weighed_score)
+      // weighed_scores.push(weighed_score)
+      weighed_average += weighed_score
+    })
+
+    // const weighed_average = sum(weighed_scores)
+
+    const confidence_weighed_prediction = prediction * (confidence / parseFloat(confidence + overall_stakes))
+
+    const quartile_rank = quantileRank(scores, prediction)
+
+    let return_on_investment = 0
+
+    console.log("here", scores)
+
+    if (quartile_rank <= 0.75 && quartile_rank >= 0.25) {
+      let inter_quartile_vals = scores.filter(score => score > quantile(scores, 0.25) && score < quantile(scores, 0.75))
+      console.log(inter_quartile_vals)
+
+      //take the money from the losers 
+      let prize = 0
+      Object.values(snapshots[0].val()[item_key].current_bids).map((bid) => {
+        let raw_score = parseFloat(bid.score) * 100 
+        if (quantileRank(scores, raw_score) < .25) {
+          prize += parseFloat(bid.stake)
+        } else if (quantileRank(scores, raw_score) > .75) {
+          prize += parseFloat(bid.stake)
+        }
+      })
+
+      //remember to divide this by the actual number of guesses within these standard deviations
+      const z_score = zScore(prediction, weighed_average, standardDeviation(inter_quartile_vals))
+      if (Math.abs(z_score) <= .5) {
+        return_on_investment = prize * 0.5
+      } else if (Math.abs(z_score) > .5 && Math.abs(z_score) <= 1) {
+        return_on_investment = prize * 0.3
+      } else {
+        return_on_investment = prize * 0.2
+      }
+    } else {
+      return_on_investment = confidence * -1
+    }
+
+    console.log(return_on_investment)
+
+    return return_on_investment
+  }
+
   const bet = () => {
 
     const user_id = findUserKey()[0]
 
-    let item_key = getActiveMarkets()[itemNum]
+    let item_key = getActiveMarkets()[0]
 
-    //first, let's check if the user has already staked on this question, in which case we will just update the bid
-    let current_bid = []
-
-    //filter wasn't working here for some reason
-    Object.keys(snapshots[0].val()[item_key].current_bids).map((key) => {
-      if (snapshots[0].val()[item_key].current_bids[key]["user"] === user_id) {
-        current_bid.push(key)
-      }
-    })
 
     //second, check the stake of the user to see that they are not over-betting
-    const available_capital = snapshots[1].val()[user_id].capital
+    const available_capital = Object.values(snapshots[1].val()[user_id].capital).pop()
 
 
       let bid = {}
@@ -124,48 +182,40 @@ const Home = () => {
 
       let update = {}
 
-      if (current_bid.length > 0) {
-        const updatedCapital = available_capital + parseFloat(item.current_bids[current_bid[0]].stake) - stake
+      const updatedCapital = available_capital - stake
 
-        if (updatedCapital < 0) {
-          alert("you are betting more money than you have available") 
-        } else {
-          firebase
-            .database()
-            .ref("/schelling/")
-            .child("items")
-            .child(item_key)
-            .child("current_bids")
-            .child(current_bid[0])
-            .update(bid)
-
-          update["capital"] = available_capital + parseFloat(item.current_bids[current_bid[0]].stake) - stake
-        }
+      if (updatedCapital < 0) {
+        alert("you are betting more money than you have available") 
+      } else if (stake > available_capital) {
+        alert("you are betting more money than you have available") 
       } else {
-        if (stake > available_capital) {
-          alert("you are betting more money than you have available") 
-        } else {
-          firebase
-            .database()
-            .ref("/schelling/")
-            .child("items")
-            .child(item_key)
-            .child("current_bids")
-            .push(bid)
+        firebase
+          .database()
+          .ref("/schelling/")
+          .child("items")
+          .child(item_key)
+          .child("current_bids")
+          .push(bid)
 
-          update["capital"] = available_capital - stake
-        }
-      } 
+        //compute the payoff 
+        const roi = payoff(parseFloat(score) * 100, stake)
 
+        //update capital
+        update["capital"] = available_capital + roi
+      }
+
+      //not sure what I'm checking for here lol
       if (Object.entries(update).length > 0) {
+
         firebase
           .database()
           .ref("/schelling/")
           .child("users")
           .child(user_id.toString())
-          .update(update)
+          .child("capital")
+          .push(update["capital"])
 
-        if (itemNum >= (getActiveMarkets().length - 1)) {
+        if ((getActiveMarkets().length - 1) < 1) {
           updateBet(true)
         } else {
           newItem(itemNum + 1)
@@ -271,7 +321,7 @@ const Home = () => {
         )
       } else {
         if (getActiveMarkets().length > 0) {
-          let current_item = snapshots[0].val()[getActiveMarkets()[itemNum]]
+          let current_item = snapshots[0].val()[getActiveMarkets()[0]]
           return (
             <div className="container">
               <h1 className="center-align">Conspiracy Coin</h1>
@@ -358,10 +408,10 @@ const Home = () => {
                     <p>Beyond the minimum payment, you will get paid a big bonus based on how close your answer is to the average </p>
                   </div>
                   <ProgressBar
-                    questionsLeft={ getActiveMarkets.length - itemNum }
+                    questionsLeft={ getActiveMarkets().length - 1 }
                     progress={ (itemNum + 1 * 1.0) / getActiveMarkets().length * 100 }
                   />
-                  <h5>${ snapshots[1].val()[findUserKey()[0]].capital } available</h5>
+                  <h5>${ Object.values(snapshots[1].val()[findUserKey()[0]].capital).pop() } left</h5>
                 </div>
               </div>
             </div>
@@ -371,6 +421,7 @@ const Home = () => {
             <div className="container">
               <h3>No new conspiracies for you to bet on</h3>
               <h3>Check back later</h3>
+              <h3>Your code is { findUserKey()[0] }</h3>
             </div>
           )
         }
